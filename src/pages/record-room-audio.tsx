@@ -10,6 +10,13 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
+if (!API_URL) {
+  throw new Error("VITE_API_URL não definida");
+}
+
+
 const isRecordingSupported =
   !!navigator.mediaDevices &&
   typeof navigator.mediaDevices.getUserMedia === "function" &&
@@ -38,22 +45,25 @@ export function RecordRoomAudio() {
   }
 
   async function uploadAudio(audio: Blob) {
-    const formData = new FormData();
+  const formData = new FormData();
 
-    formData.append("file", audio, "audio.webm");
+  formData.append("file", audio, "audio.webm");
 
-    const response = await fetch(
-      `http://localhost:3333/rooms/${params.roomId}/audio`,
-      {
-        method: "POST",
-        body: formData,
-      }
-    );
+  const response = await fetch(
+    `${API_URL}/rooms/${params.roomId}/audio`,
+    {
+      method: "POST",
+      body: formData,
+    }
+  );
 
-    const result = await response.json();
-
-    console.log(result);
+  if (!response.ok) {
+    throw new Error("Erro ao enviar áudio");
   }
+
+  const result = await response.json();
+  console.log(result);
+}
 
   function createRecorder(audio: MediaStream) {
     recorder.current = new MediaRecorder(audio, {

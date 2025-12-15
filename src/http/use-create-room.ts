@@ -2,12 +2,14 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { CreateRoomRequest } from "./types/create-room-request";
 import type { CreateRoomResponse } from "./types/create-rooms-response";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export function useCreateRoom() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (data: CreateRoomRequest) => {
-      const response = await fetch("http://localhost:3333/rooms", {
+      const response = await fetch(`${API_URL}/rooms`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -15,8 +17,11 @@ export function useCreateRoom() {
         body: JSON.stringify(data),
       });
 
-      const result: CreateRoomResponse = await response.json();
+      if (!response.ok) {
+        throw new Error("Erro ao criar sala");
+      }
 
+      const result: CreateRoomResponse = await response.json();
       return result;
     },
 
